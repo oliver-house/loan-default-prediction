@@ -1,4 +1,4 @@
-# Loan Default Risk
+# Loan Default Prediction
 
 Predicts loan default risk from loan application data and alternative sources.
 

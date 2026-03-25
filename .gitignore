@@ -1,0 +1,51 @@
+# Data (too large for git)
+data/
+predictions/
+outputs/
+*.csv
+*.pkl
+*.parquet
+*.feather
+*.h5
+
+# Saved model artefacts
+*.bin
+*.txt.fold*
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+.env
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Optuna
+*.db
+
+# CatBoost training logs (auto-generated)
+catboost_info/

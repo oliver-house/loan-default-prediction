@@ -1,8 +1,11 @@
+import gc
 import pandas as pd
 
 from src.config import DATA_FILES, RANDOM_STATE
 from src.utils.helpers import get_logger, timer
 from src.features.application import process_application
+from src.features.bureau import process_bureau
+from src.features.previous_application import process_previous_application
 
 logger = get_logger(__name__)
 
@@ -37,3 +40,26 @@ def build_features(smoke_n: int = 0) -> tuple[pd.DataFrame, pd.DataFrame]:
             bureau_balance = bureau_balance[
                 bureau_balance["SK_ID_BUREAU"].isin(bureau["SK_ID_BUREAU"])
             ].reset_index(drop=True)
+        bureau_agg = process_bureau(bureau, bureau_balance)
+        del bureau, bureau_balance; gc.collect()
+
+        train = train.merge(bureau_agg, on="SK_ID_CURR", how="left")
+        test  = test.merge(bureau_agg,  on="SK_ID_CURR", how="left")
+        del bureau_agg; gc.collect()
+
+    # ── Previous applications ────────────────────────────────────────────────
+    with timer("Previous application features", logger):
+        prev = pd.read_csv(DATA_FILES["prev_app"])
+        if smoke_ids:
+            prev = prev[prev["SK_ID_CURR"].isin(smoke_ids)].reset_index(drop=True)
+        prev_agg = process_previous_application(prev)
+        del prev; gc.collect()
+        train = train.merge(prev_agg, on="SK_ID_CURR", how="left")
+        test  = test.merge(prev_agg,  on="SK_ID_CURR", how="left")
+        del prev_agg; gc.collect()
+
+    # ── POS CASH balance ──────────────────────────────────────────────────────
+    with timer("POS CASH features", logger):
+        pos = pd.read_csv(DATA_FILES["pos_cash"])
+        if smoke_ids:
+            pos = pos[pos["SK_ID_CURR"].isin(smoke_ids)].reset_index(drop=True)

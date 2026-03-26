@@ -1,4 +1,5 @@
 import gc
+import numpy as np
 import pandas as pd
 
 from src.config import DATA_FILES, RANDOM_STATE
@@ -6,6 +7,9 @@ from src.utils.helpers import get_logger, timer
 from src.features.application import process_application
 from src.features.bureau import process_bureau
 from src.features.previous_application import process_previous_application
+from src.features.pos_cash import process_pos_cash
+from src.features.installments import process_installments
+from src.features.credit_card import process_credit_card
 
 logger = get_logger(__name__)
 
@@ -63,3 +67,47 @@ def build_features(smoke_n: int = 0) -> tuple[pd.DataFrame, pd.DataFrame]:
         pos = pd.read_csv(DATA_FILES["pos_cash"])
         if smoke_ids:
             pos = pos[pos["SK_ID_CURR"].isin(smoke_ids)].reset_index(drop=True)
+        pos_agg = process_pos_cash(pos)
+        del pos; gc.collect()
+
+        train = train.merge(pos_agg, on="SK_ID_CURR", how="left")
+        test  = test.merge(pos_agg,  on="SK_ID_CURR", how="left")
+        del pos_agg; gc.collect()
+
+    # ── Installments payments ─────────────────────────────────────────────────
+    with timer("Installments features", logger):
+        ins = pd.read_csv(DATA_FILES["installments"])
+        if smoke_ids:
+            ins = ins[ins["SK_ID_CURR"].isin(smoke_ids)].reset_index(drop=True)
+        ins_agg = process_installments(ins)
+        del ins; gc.collect()
+
+        train = train.merge(ins_agg, on="SK_ID_CURR", how="left")
+        test  = test.merge(ins_agg,  on="SK_ID_CURR", how="left")
+        del ins_agg; gc.collect()
+
+    # ── Credit card balance ───────────────────────────────────────────────────
+    with timer("Credit card features", logger):
+        cc = pd.read_csv(DATA_FILES["credit_card"])
+        if smoke_ids:
+            cc = cc[cc["SK_ID_CURR"].isin(smoke_ids)].reset_index(drop=True)
+        cc_agg = process_credit_card(cc)
+        del cc; gc.collect()
+
+        train = train.merge(cc_agg, on="SK_ID_CURR", how="left")
+        test  = test.merge(cc_agg,  on="SK_ID_CURR", how="left")
+        del cc_agg; gc.collect()
+
+    # ── Coerce object columns and downcast float64 → float32 ─────────────────
+    for df in (train, test):
+        obj_cols = df.select_dtypes(include="object").columns.tolist()
+        if obj_cols:
+            df[obj_cols] = df[obj_cols].apply(pd.to_numeric, errors="coerce")
+        f64_cols = df.select_dtypes(include="float64").columns.tolist()
+        if f64_cols:
+            df[f64_cols] = df[f64_cols].astype(np.float32)
+
+    logger.info(f"Final train shape: {train.shape}")
+    logger.info(f"Final test shape:  {test.shape}")
+
+    return train, test

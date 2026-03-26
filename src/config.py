@@ -18,3 +18,5 @@ DATA_FILES = {
 
 # ── Cross-validation ─────────────────────────────────────────────────────────
 RANDOM_STATE = 42
+TARGET_COL = "TARGET"
+ID_COL = "SK_ID_CURR"

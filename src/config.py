@@ -14,8 +14,6 @@ DATA_FILES = {
     "credit_card": DATA_DIR / "credit_card_balance.csv",
     "prev_app": DATA_DIR / "previous_application.csv",
     "installments": DATA_DIR / "installments_payments.csv",
-    "columns_desc": DATA_DIR / "HomeCredit_columns_description.csv",
-    "sample_submission": DATA_DIR / "sample_submission.csv",
 }
 
 # ── Cross-validation ─────────────────────────────────────────────────────────

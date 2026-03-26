@@ -20,17 +20,16 @@ def process_application(df: pd.DataFrame) -> pd.DataFrame:
     # ── Core financial ratios ─────────────────────────────────────────────────
     df["CREDIT_INCOME_RATIO"] = df["AMT_CREDIT"] / (df["AMT_INCOME_TOTAL"] + 1)
     df["ANNUITY_INCOME_RATIO"] = df["AMT_ANNUITY"] / (df["AMT_INCOME_TOTAL"] + 1)
-    df["CREDIT_TERM"] = df["AMT_ANNUITY"] / (df["AMT_CREDIT"] + 1)
+    df["PAYMENT_RATE"] = df["AMT_ANNUITY"] / (df["AMT_CREDIT"] + 1)
     df["CREDIT_GOODS_RATIO"] = df["AMT_CREDIT"] / (df["AMT_GOODS_PRICE"] + 1)
     df["GOODS_INCOME_RATIO"] = df["AMT_GOODS_PRICE"] / (df["AMT_INCOME_TOTAL"] + 1)
     df["INCOME_PER_PERSON"] = df["AMT_INCOME_TOTAL"] / (df["CNT_FAM_MEMBERS"] + 1)
-    df["PAYMENT_RATE"] = df["AMT_ANNUITY"] / (df["AMT_CREDIT"] + 1)
     df["DOWN_PAYMENT"] = df["AMT_GOODS_PRICE"] - df["AMT_CREDIT"]
     df["DOWN_PAYMENT_RATIO"] = df["DOWN_PAYMENT"] / (df["AMT_GOODS_PRICE"] + 1)
 
     # ── Employment / age ratios ───────────────────────────────────────────────
     df["EMPLOYED_TO_BIRTH_RATIO"] = df["DAYS_EMPLOYED"] / (df["DAYS_BIRTH"] + 1)
-    df["INCOME_CREDIT_PERC"] = df["AMT_INCOME_TOTAL"] / (df["AMT_CREDIT"] + 1)
+    df["INCOME_CREDIT_RATIO"] = df["AMT_INCOME_TOTAL"] / (df["AMT_CREDIT"] + 1)
 
     # ── External source interactions ──────────────────────────────────────────
     ext_cols = ["EXT_SOURCE_1", "EXT_SOURCE_2", "EXT_SOURCE_3"]
@@ -45,7 +44,7 @@ def process_application(df: pd.DataFrame) -> pd.DataFrame:
     ) / 6
 
     # ── Credit-to-external-score ratios ───────────────────────────────────────
-    for src in ["EXT_SOURCE_1", "EXT_SOURCE_2", "EXT_SOURCE_3"]:
+    for src in ext_cols:
         df[f"CREDIT_{src}_RATIO"] = df["AMT_CREDIT"] / (df[src] + 1e-5)
         df[f"ANNUITY_{src}_RATIO"] = df["AMT_ANNUITY"] / (df[src] + 1e-5)
 

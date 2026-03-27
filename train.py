@@ -4,7 +4,7 @@ import json
 import pandas as pd
 from sklearn.metrics import roc_auc_score
 
-from src.config import ID_COL, TARGET_COL, PREDICTIONS_DIR, DATA_DIR
+from src.config import ID_COL, TARGET_COL, PREDICTIONS_DIR, ROOT_DIR
 from src.features.pipeline import build_features
 from src.models.lgbm_model import train_lgbm
 from src.models.xgb_model import train_xgb
@@ -32,7 +32,7 @@ def main() -> None:
 
     # ── Save processed datasets ───────────────────────────────────────────────
     if not args.smoke:
-        processed_dir = DATA_DIR / "processed"
+        processed_dir = ROOT_DIR / "processed"
         processed_dir.mkdir(exist_ok=True)
         train.to_csv(processed_dir / "train_features.csv", index=False)
         test.to_csv(processed_dir / "test_features.csv", index=False)

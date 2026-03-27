@@ -3,6 +3,7 @@ from pathlib import Path
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = Path(os.environ.get("CREDITRISK_DATA_DIR", ROOT_DIR / "data"))
+PREDICTIONS_DIR = ROOT_DIR / "predictions"
 
 # ── Data files ───────────────────────────────────────────────────────────────
 DATA_FILES = {
@@ -17,6 +18,67 @@ DATA_FILES = {
 }
 
 # ── Cross-validation ─────────────────────────────────────────────────────────
+N_FOLDS = 5
 RANDOM_STATE = 42
 TARGET_COL = "TARGET"
 ID_COL = "SK_ID_CURR"
+
+# ── LightGBM hyperparameters ─────────────────────────────────────────────────
+LGBM_PARAMS = {
+    "objective": "binary",
+    "metric": "auc",
+    "boosting_type": "gbdt",
+    "n_estimators": 10000,
+    "learning_rate": 0.05,
+    "num_leaves": 34,
+    "max_depth": -1,
+    "min_child_samples": 20,
+    "feature_fraction": 0.9,
+    "bagging_fraction": 0.9,
+    "bagging_freq": 1,
+    "reg_alpha": 0.1,
+    "reg_lambda": 0.1,
+    "min_split_gain": 0.01,
+    "verbose": -1,
+    "n_jobs": -1,
+    "random_state": RANDOM_STATE,
+}
+
+# ── XGBoost hyperparameters ──────────────────────────────────────────────────
+XGB_PARAMS = {
+    "objective": "binary:logistic",
+    "eval_metric": "auc",
+    "n_estimators": 5000,
+    "learning_rate": 0.05,
+    "max_depth": 6,
+    "min_child_weight": 30,
+    "subsample": 0.85,
+    "colsample_bytree": 0.85,
+    "reg_alpha": 0.1,
+    "reg_lambda": 0.1,
+    "tree_method": "hist",
+    "random_state": RANDOM_STATE,
+    "n_jobs": -1,
+    "verbosity": 0,
+}
+
+# ── CatBoost hyperparameters ─────────────────────────────────────────────────
+CB_PARAMS = {
+    "n_estimators": 5000,
+    "learning_rate": 0.05,
+    "depth": 6,
+    "l2_leaf_reg": 3,
+    "bagging_temperature": 1,
+    "border_count": 128,
+    "loss_function": "Logloss",
+    "eval_metric": "AUC",
+    "random_seed": RANDOM_STATE,
+    "verbose": 0,
+}
+
+# ── Ensemble weights (tuned on OOF scores) ───────────────────────────────────
+ENSEMBLE_WEIGHTS = {
+    "lgbm": 0.6,
+    "xgb": 0.2,
+    "catboost": 0.2,
+}

@@ -1,10 +1,60 @@
 # Loan Default Prediction
 
-Predicts loan default risk from loan application data and alternative sources.
+Predicts loan default risk using loan applications together with alternative financial data.
 
-## Status
+A blended ensemble (LightGBM + XGBoost + CatBoost) trained on ~950 features extracted from 8 relational tables, with feature engineering and 5-fold stratified cross-validation.
 
-In development. Feature engineering is complete across all tables: main application, credit bureau, previous applications, POS cash, instalment payments, and credit card balances (~950 features). LightGBM, XGBoost, and CatBoost models are in place with an ensemble blend, but training is not yet fully wired up.
+## Results
+
+| Model | OOF AUC | Held-out Test AUC |
+|-------|---------|-------------------|
+| LightGBM | 0.7894 | — |
+| XGBoost | 0.7926 | — |
+| CatBoost | 0.7921 | — |
+| **Ensemble** | **0.7931** | **0.7839** |
+
+## Repository Structure
+
+```
+train.py                    # Entry point
+src/
+  config.py                 # Paths, constants, model parameters
+  features/
+    pipeline.py             # Orchestrates feature engineering
+    application.py          # Main application table features
+    bureau.py               # Credit bureau features
+    previous_application.py # Previous Home Credit application features
+    pos_cash.py             # POS cash balance features
+    installments.py         # Instalment payment features
+    credit_card.py          # Credit card balance features
+  models/
+    lgbm_model.py           # LightGBM training
+    xgb_model.py            # XGBoost training
+    catboost_model.py       # CatBoost training
+    ensemble.py             # Weighted blend
+  utils/
+    helpers.py              # Logging, memory reduction, timing
+```
+
+## Data
+
+Download the data from [here](https://www.kaggle.com/competitions/home-credit-default-risk/data) and place the following files in `data/` in the project root:
+
+```
+data/
+  application_train.csv
+  application_test.csv
+  bureau.csv
+  bureau_balance.csv
+  POS_CASH_balance.csv
+  credit_card_balance.csv
+  previous_application.csv
+  installments_payments.csv
+```
+
+## Requirements
+
+Python 3.13. Dependencies listed in `requirements.txt`.
 
 ## Setup
 

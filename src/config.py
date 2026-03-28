@@ -78,10 +78,3 @@ CB_PARAMS = {
     "random_seed": RANDOM_STATE,
     "verbose": 0,
 }
-
-# ── Ensemble weights (tuned on OOF scores) ───────────────────────────────────
-ENSEMBLE_WEIGHTS = {
-    "lgbm": 0.6,
-    "xgb": 0.2,
-    "catboost": 0.2,
-}

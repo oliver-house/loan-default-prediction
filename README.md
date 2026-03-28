@@ -6,17 +6,18 @@ A blended ensemble (LightGBM + XGBoost + CatBoost) trained on ~950 features extr
 
 ## Results
 
-| Model | OOF AUC | Held-out Test AUC |
-|-------|---------|-------------------|
-| LightGBM | 0.7894 | — |
-| XGBoost | 0.7926 | — |
-| CatBoost | 0.7921 | — |
-| **Ensemble** | **0.7931** | **0.7839** |
+| Model | OOF AUC | Held-out Test AUC | Weight |
+|-------|---------|-------------------|--------|
+| LightGBM | 0.7894 | — | 0.12 |
+| XGBoost | 0.7926 | — | 0.46 |
+| CatBoost | 0.7921 | — | 0.42 |
+| **Ensemble** | **0.7947** | **0.7885** | — |
 
 ## Repository Structure
 
 ```
-train.py                    # Entry point
+train.py                    # Entry point: feature engineering, training, predictions
+tune_weights.py             # Grid search over ensemble weights; saves optimised predictions
 src/
   config.py                 # Paths, constants, model parameters
   features/

@@ -17,7 +17,7 @@ import json
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from sklearn.metrics import roc_auc_score
+from sklearn.metrics import roc_auc_score, roc_curve
 
 from src.config import ID_COL, TARGET_COL, PREDICTIONS_DIR, ROOT_DIR
 from src.features.pipeline import build_features
@@ -74,6 +74,23 @@ def _plot_weight_tuning(df: pd.DataFrame) -> None:
     logger.info(f"Weight tuning plot saved to {out_path}")
 
 
+def _plot_roc_curve(y: np.ndarray, oof_blend: np.ndarray, auc: float) -> None:
+    """ROC curve for ensemble OOF predictions."""
+    fpr, tpr, _ = roc_curve(y, oof_blend)
+    fig, ax = plt.subplots(figsize=(7, 6))
+    ax.plot(fpr, tpr, lw=1.5, label=f"Ensemble (AUC = {auc:.5f})")
+    ax.plot([0, 1], [0, 1], linestyle="--", color="grey", lw=1)
+    ax.set_xlabel("False positive rate")
+    ax.set_ylabel("True positive rate")
+    ax.set_title("Ensemble OOF ROC curve")
+    ax.legend(loc="lower right")
+    out_path = PREDICTIONS_DIR / "roc_curve.png"
+    plt.tight_layout()
+    plt.savefig(out_path, dpi=150)
+    plt.close()
+    logger.info(f"ROC curve saved to {out_path}")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--smoke", action="store_true",
@@ -104,13 +121,13 @@ def main() -> None:
     fold_kwargs = {} if n_folds is None else {"n_folds": n_folds}
 
     with timer("LightGBM", logger):
-        lgbm_oof, lgbm_test, lgbm_aucs = train_lgbm(train, test, features, **fold_kwargs)
+        lgbm_oof, lgbm_test, _ = train_lgbm(train, test, features, **fold_kwargs)
 
     with timer("XGBoost", logger):
-        xgb_oof, xgb_test, xgb_aucs = train_xgb(train, test, features, **fold_kwargs)
+        xgb_oof, xgb_test, _ = train_xgb(train, test, features, **fold_kwargs)
 
     with timer("CatBoost", logger):
-        cb_oof, cb_test, cb_aucs = train_catboost(train, test, features, **fold_kwargs)
+        cb_oof, cb_test, _ = train_catboost(train, test, features, **fold_kwargs)
 
     # ── Weight tuning ─────────────────────────────────────────────────────────
     with timer("Weight tuning", logger):
@@ -127,6 +144,7 @@ def main() -> None:
 
     PREDICTIONS_DIR.mkdir(exist_ok=True)
     _plot_weight_tuning(wt_df)
+    _plot_roc_curve(y, oof_blend, best_auc)
 
     # ── Save OOF predictions ──────────────────────────────────────────────────
     oof_df = pd.DataFrame({

@@ -1,3 +1,7 @@
+"""
+Feature engineering for bureau.csv and bureau_balance.csv
+"""
+
 import pandas as pd
 
 from src.utils.helpers import one_hot_encoder, reduce_mem_usage

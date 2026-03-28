@@ -1,10 +1,17 @@
+"""
+Feature engineering for application_train.csv / application_test.csv
+"""
+
 import numpy as np
 import pandas as pd
 
 from src.utils.helpers import one_hot_encoder
 
 def process_application(df: pd.DataFrame) -> pd.DataFrame:
-
+    """
+    Takes the raw application dataframe (train or test) and returns it
+    with additional engineered features appended.
+    """
     df = df.copy()
 
     # ── Anomaly flag: DAYS_EMPLOYED = 365243 means unemployed ────────────────

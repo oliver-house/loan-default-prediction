@@ -1,3 +1,15 @@
+"""
+End-to-end training pipeline.
+
+Builds features, trains all three models with cross-validation,
+blends predictions, and saves OOF + test predictions to disk.
+
+Usage
+-----
+    python train.py               # full run
+    python train.py --smoke       # quick sanity check (5 000 rows, 2 folds)
+"""
+
 import argparse
 import json
 

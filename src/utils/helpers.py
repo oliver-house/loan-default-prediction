@@ -1,3 +1,7 @@
+"""
+Helper functions: logging, timing, and memory reduction
+"""
+
 import gc
 import logging
 import time

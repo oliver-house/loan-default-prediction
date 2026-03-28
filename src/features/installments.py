@@ -1,3 +1,7 @@
+"""
+Feature engineering for installments_payments.csv
+"""
+
 import numpy as np
 import pandas as pd
 

@@ -1,3 +1,7 @@
+"""
+Feature pipeline: loads all raw tables, runs each feature module, and joins everything to produce a pair of feature matrices (train and test)
+"""
+
 import gc
 import numpy as np
 import pandas as pd
@@ -14,6 +18,9 @@ from src.features.credit_card import process_credit_card
 logger = get_logger(__name__)
 
 def build_features(smoke_n: int = 0) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """
+    Build the full feature matrices for train and test sets.
+    """
     # ── Application (main table) ──────────────────────────────────────────────
     with timer("Application features", logger):
         train = pd.read_csv(DATA_FILES["train"])

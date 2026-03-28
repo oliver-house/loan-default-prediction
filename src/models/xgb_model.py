@@ -1,3 +1,7 @@
+"""
+XGBoost model with stratified K-Fold cross-validation
+"""
+
 import gc
 import numpy as np
 import pandas as pd
@@ -17,6 +21,10 @@ def train_xgb(
     features: list[str],
     n_folds: int = N_FOLDS,
 ) -> tuple[np.ndarray, np.ndarray, list[float]]:
+    """
+    Train XGBoost with stratified K-Fold CV.
+    Returns out-of-fold predictions, test predictions, and per-fold AUC scores.
+    """
     X      = train[features].values
     y      = train[TARGET_COL].values
     X_test = test[features].values

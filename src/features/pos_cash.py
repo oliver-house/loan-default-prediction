@@ -1,3 +1,7 @@
+"""
+Feature engineering for POS_CASH_balance.csv
+"""
+
 import numpy as np
 import pandas as pd
 

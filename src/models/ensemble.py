@@ -1,3 +1,7 @@
+"""
+Weighted ensemble of LightGBM, XGBoost, and CatBoost OOF predictions
+"""
+
 import numpy as np
 from sklearn.metrics import roc_auc_score
 
@@ -12,10 +16,12 @@ def blend(
     y: np.ndarray,
     weights: dict[str, float] | None = None,
 ) -> tuple[np.ndarray, np.ndarray]:
+    """
+    Weighted average of OOF and test predictions from multiple models
+    """
     if weights is None:
         weights = ENSEMBLE_WEIGHTS
 
-    # Normalise weights in case they don't sum to 1
     total = sum(weights[k] for k in oof_dict)
     norm  = {k: weights[k] / total for k in oof_dict}
 

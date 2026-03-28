@@ -1,3 +1,7 @@
+"""
+Feature engineering for credit_card_balance.csv.
+"""
+
 import numpy as np
 import pandas as pd
 

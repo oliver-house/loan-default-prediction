@@ -1,3 +1,7 @@
+"""
+Feature engineering for previous_application.csv
+"""
+
 import numpy as np
 import pandas as pd
 

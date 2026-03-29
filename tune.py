@@ -1,4 +1,4 @@
-"""Tune LightGBM hyperparameters with Optuna and save best params to disk"""
+"""Tune LightGBM hyperparameters with Optuna and save best params to params/lgbm_best_params.json"""
 
 import argparse
 import json
@@ -9,7 +9,7 @@ from sklearn.metrics import roc_auc_score
 from sklearn.model_selection import StratifiedKFold
 import lightgbm as lgb
 
-from src.config import RANDOM_STATE, TARGET_COL, ID_COL, PREDICTIONS_DIR
+from src.config import RANDOM_STATE, TARGET_COL, ID_COL, PARAMS_DIR
 from src.features.pipeline import build_features
 from src.utils.helpers import get_logger, timer
 
@@ -113,11 +113,10 @@ def main() -> None:
     for k, v in best.params.items():
         logger.info(f"  {k}: {v}")
 
-    out = {"oof_auc": round(best.value, 5), "params": best.params}
-    PREDICTIONS_DIR.mkdir(exist_ok=True)
-    out_path = PREDICTIONS_DIR / "lgbm_best_params.json"
+    PARAMS_DIR.mkdir(exist_ok=True)
+    out_path = PARAMS_DIR / "lgbm_best_params.json"
     with open(out_path, "w") as f:
-        json.dump(out, f, indent=2)
+        json.dump(best.params, f, indent=2)
     logger.info(f"Best params saved to {out_path}")
 
 if __name__ == "__main__":

@@ -3,6 +3,7 @@ LightGBM model with stratified K-Fold cross-validation
 """
 
 import gc
+import json
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import StratifiedKFold
@@ -10,10 +11,24 @@ from sklearn.metrics import roc_auc_score
 import lightgbm as lgb
 from tqdm import tqdm
 
-from src.config import LGBM_PARAMS, N_FOLDS, RANDOM_STATE, TARGET_COL
+from src.config import N_FOLDS, PARAMS_DIR, RANDOM_STATE, TARGET_COL
 from src.utils.helpers import get_logger
 
 logger = get_logger(__name__)
+
+_BEST_PARAMS_PATH = PARAMS_DIR / "lgbm_best_params.json"
+
+
+def _load_params() -> dict:
+    """Load tuned LightGBM params from lgbm_best_params.json."""
+    if not _BEST_PARAMS_PATH.exists():
+        raise FileNotFoundError(
+            f"No tuned params found at {_BEST_PARAMS_PATH}. Run tune.py first."
+        )
+    with open(_BEST_PARAMS_PATH) as f:
+        params = json.load(f)
+    logger.info(f"Loaded tuned LightGBM params from {_BEST_PARAMS_PATH}")
+    return params
 
 
 def train_lgbm(
@@ -35,6 +50,9 @@ def train_lgbm(
     fold_aucs        = []
     fold_importances = np.zeros(len(features))
 
+    base_params  = _load_params()
+    n_estimators = base_params.pop("n_estimators")
+
     skf = StratifiedKFold(n_splits=n_folds, shuffle=True, random_state=RANDOM_STATE)
 
     for fold, (trn_idx, val_idx) in tqdm(
@@ -48,8 +66,7 @@ def train_lgbm(
         trn_data = lgb.Dataset(X_trn, label=y_trn)
         val_data = lgb.Dataset(X_val, label=y_val, reference=trn_data)
 
-        params = {**LGBM_PARAMS}
-        n_estimators = params.pop("n_estimators")
+        params = {**base_params}
 
         callbacks = [
             lgb.early_stopping(stopping_rounds=100, verbose=False),

@@ -3,7 +3,7 @@ End-to-end training pipeline.
 
 Builds features, trains all three models,
 tunes ensemble weights via grid search,
-and saves OOF + test predictions, feature importances, and diagnostic plots to disk.
+and saves OOF + test predictions, feature importances, selected features, and diagnostic plots to disk.
 
 Usage
 -----
@@ -28,8 +28,9 @@ from src.utils.helpers import get_logger, timer
 
 logger = get_logger(__name__)
 
-SMOKE_ROWS  = 5_000
-SMOKE_FOLDS = 2
+SMOKE_ROWS           = 5_000
+SMOKE_FOLDS          = 2
+IMPORTANCE_THRESHOLD = 0.99   # cumulative ensemble importance cutoff for feature selection
 
 
 def _tune_weights(
@@ -99,6 +100,16 @@ def _norm(arr: np.ndarray) -> np.ndarray:
     return arr / s
 
 
+def _select_features(imp_df: pd.DataFrame, threshold: float = IMPORTANCE_THRESHOLD) -> list[str]:
+    """Return features whose cumulative ensemble importance reaches the threshold."""
+    cumsum = imp_df["ensemble"].cumsum()
+    n = int((cumsum < threshold).sum()) + 1
+    selected = imp_df["feature"].iloc[:n].tolist()
+    logger.info(f"Selected {len(selected)}/{len(imp_df)} features "
+                f"({threshold:.0%} cumulative importance)")
+    return selected
+
+
 def _plot_feature_importances(df: pd.DataFrame, top_n: int = 30) -> None:
     """Horizontal bar charts of top N features for each model and the ensemble."""
     top = df.head(top_n)
@@ -132,7 +143,16 @@ def main() -> None:
         train, test = build_features(n_rows=smoke_n)
 
     features = [c for c in train.columns if c not in [TARGET_COL, ID_COL]]
-    logger.info(f"Training with {len(features)} features")
+
+    # ── Load pre-selected features if available ───────────────────────────────
+    selected_path = PREDICTIONS_DIR / "selected_features.json"
+    if selected_path.exists():
+        with open(selected_path) as f:
+            selected = json.load(f)
+        features = [ft for ft in features if ft in selected]
+        logger.info(f"Loaded {len(features)} pre-selected features")
+    else:
+        logger.info(f"Training with all {len(features)} features")
 
     y = train[TARGET_COL].values
 
@@ -203,6 +223,11 @@ def main() -> None:
     imp_df.to_csv(imp_path, index=False)
     logger.info(f"Feature importances saved to {imp_path}")
     _plot_feature_importances(imp_df)
+
+    selected = _select_features(imp_df)
+    with open(selected_path, "w") as f:
+        json.dump(selected, f, indent=2)
+    logger.info(f"Selected features saved to {selected_path}")
 
     # ── Save results summary ──────────────────────────────────────────────────
     results = {

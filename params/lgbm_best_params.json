@@ -1,0 +1,14 @@
+{
+  "oof_auc": 0.78078,
+  "params": {
+    "learning_rate": 0.0630650007781751,
+    "num_leaves": 45,
+    "max_depth": 4,
+    "min_child_samples": 171,
+    "subsample": 0.7949655523430676,
+    "colsample_bytree": 0.9106079302233677,
+    "reg_alpha": 0.00196454143993476,
+    "reg_lambda": 0.023855192916863614,
+    "min_split_gain": 0.524472733345477
+  }
+}

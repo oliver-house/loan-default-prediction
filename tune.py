@@ -54,7 +54,7 @@ def objective(
         model = lgb.train(
             params,
             trn_data,
-            num_boost_round=2000,
+            num_boost_round=200,
             valid_sets=[val_data],
             callbacks=[
                 lgb.early_stopping(stopping_rounds=50, verbose=False),
@@ -76,7 +76,7 @@ def main() -> None:
     args = parser.parse_args()
 
     with timer("Feature engineering", logger):
-        train, _ = build_features()
+        train, _ = build_features(n_rows=args.sample)
 
     features = [c for c in train.columns if c not in [TARGET_COL, ID_COL]]
     X = train[features].values
@@ -99,6 +99,10 @@ def main() -> None:
         n_trials=args.trials,
         show_progress_bar=True,
     )
+
+    if not study.trials or all(t.state.name != "COMPLETE" for t in study.trials):
+        logger.error("No trials completed successfully — check sample size and data.")
+        return
 
     best = study.best_trial
     logger.info(f"Best OOF AUC: {best.value:.5f}")

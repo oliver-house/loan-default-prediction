@@ -17,7 +17,7 @@ from src.features.credit_card import process_credit_card
 
 logger = get_logger(__name__)
 
-def build_features(smoke_n: int = 0) -> tuple[pd.DataFrame, pd.DataFrame]:
+def build_features(n_rows: int = 0) -> tuple[pd.DataFrame, pd.DataFrame]:
     """
     Build the full feature matrices for train and test sets.
     """
@@ -27,13 +27,13 @@ def build_features(smoke_n: int = 0) -> tuple[pd.DataFrame, pd.DataFrame]:
         test  = pd.read_csv(DATA_FILES["test"])
         logger.info(f"Train: {train.shape}, Test: {test.shape}")
 
-        if smoke_n:
+        if n_rows:
             train = train.sample(
-                n=min(smoke_n, len(train)), random_state=RANDOM_STATE
+                n=min(n_rows, len(train)), random_state=RANDOM_STATE
             ).reset_index(drop=True)
-            logger.info(f"[SMOKE] Sampled train to {len(train)} rows")
+            logger.info(f"Sampled train to {len(train)} rows")
 
-        smoke_ids: set | None = set(train["SK_ID_CURR"]) if smoke_n else None
+        smoke_ids: set | None = set(train["SK_ID_CURR"]) if n_rows else None
 
         train = process_application(train)
         test  = process_application(test)

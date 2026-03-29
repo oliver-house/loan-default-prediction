@@ -19,7 +19,7 @@ import numpy as np
 import pandas as pd
 from sklearn.metrics import roc_auc_score, roc_curve
 
-from src.config import ID_COL, TARGET_COL, PREDICTIONS_DIR, ROOT_DIR
+from src.config import ID_COL, TARGET_COL, PREDICTIONS_DIR
 from src.features.pipeline import build_features
 from src.models.lgbm_model import train_lgbm
 from src.models.xgb_model import train_xgb
@@ -102,15 +102,7 @@ def main() -> None:
     n_folds = SMOKE_FOLDS if args.smoke else None
 
     with timer("Feature engineering", logger):
-        train, test = build_features(smoke_n=smoke_n)
-
-    # ── Save processed datasets ───────────────────────────────────────────────
-    if not args.smoke:
-        processed_dir = ROOT_DIR / "processed"
-        processed_dir.mkdir(exist_ok=True)
-        train.to_csv(processed_dir / "train_features.csv", index=False)
-        test.to_csv(processed_dir / "test_features.csv", index=False)
-        logger.info(f"Processed datasets saved to {processed_dir}")
+        train, test = build_features(n_rows=smoke_n)
 
     features = [c for c in train.columns if c not in [TARGET_COL, ID_COL]]
     logger.info(f"Training with {len(features)} features")

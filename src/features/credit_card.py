@@ -74,10 +74,4 @@ def process_credit_card(cc: pd.DataFrame) -> pd.DataFrame:
         )
         cc_agg = cc_agg.join(rec_agg, how="left")
 
-    # ── Ever overdue flag ─────────────────────────────────────────────────────
-    if "SK_DPD" in cc.columns:
-        cc_agg["CC_DPD_EVER"] = (
-            cc.groupby("SK_ID_CURR")["SK_DPD"].max() > 0
-        ).astype(np.int8)
-
     return cc_agg.reset_index()

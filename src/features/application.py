@@ -16,7 +16,6 @@ def process_application(df: pd.DataFrame) -> pd.DataFrame:
     df = df.copy()
 
     # ── Anomaly flag: DAYS_EMPLOYED = 365243 means unemployed ────────────────
-    df["DAYS_EMPLOYED_ANOMALY"] = (df["DAYS_EMPLOYED"] == SENTINEL_DAYS).astype(np.int8)
     df["DAYS_EMPLOYED"] = df["DAYS_EMPLOYED"].replace(SENTINEL_DAYS, np.nan)
 
     # ── Age / tenure in years ─────────────────────────────────────────────────

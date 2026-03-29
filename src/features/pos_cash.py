@@ -51,11 +51,6 @@ def process_pos_cash(pos: pd.DataFrame) -> pd.DataFrame:
         )
         pos_agg = pos_agg.join(rec_agg, how="left")
 
-    # ── DPD flag: ever had overdue ────────────────────────────────────────────
-    if "SK_DPD" in pos.columns:
-        dpd_flag = (pos.groupby("SK_ID_CURR")["SK_DPD"].max() > 0).astype(np.int8)
-        pos_agg["POS_DPD_EVER"] = dpd_flag
-
     # ── Completed loans ratio ─────────────────────────────────────────────────
     completed_col = "NAME_CONTRACT_STATUS_Completed"
     if completed_col in pos.columns:

@@ -21,7 +21,7 @@ DATA_FILES = {
 }
 
 # ── Cross-validation ─────────────────────────────────────────────────────────
-N_FOLDS = 5
+N_FOLDS = 3
 RANDOM_STATE = 42
 TARGET_COL = "TARGET"
 ID_COL = "SK_ID_CURR"

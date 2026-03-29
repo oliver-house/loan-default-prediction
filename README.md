@@ -7,14 +7,13 @@ End-to-end credit risk modelling pipeline engineering ~950 features from 8 relat
 ```mermaid
 flowchart LR
     A[8 Raw Tables] --> B[Feature Engineering\n~950 features]
-    B --> C[Feature Selection\nparams/selected_features.json]
+    B --> C[Feature Selection]
     C --> D[LightGBM]
     C --> E[XGBoost]
     C --> F[CatBoost]
-    D & E & F --> G[Grid Search\nWeight Tuning]
-    G --> H[Blended Ensemble]
-    H --> I[OOF & Test Predictions]
-    H --> J[Feature Importances]
+    D & E & F --> G[Weighted Ensemble]
+    G --> H[OOF & Test Predictions]
+    G --> I[Feature Importances]
 ```
 
 ## Results

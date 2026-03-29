@@ -8,6 +8,7 @@ End-to-end credit risk modelling pipeline engineering ~950 features from 8 relat
 flowchart LR
     A[8 Raw Tables] --> B[Feature Engineering\n~950 features]
     B --> C[Feature Selection]
+    T[Hyperparameter Tuning] --> D
     C --> D[LightGBM]
     C --> E[XGBoost]
     C --> F[CatBoost]

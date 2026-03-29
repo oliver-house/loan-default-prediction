@@ -5,6 +5,7 @@ Feature engineering for POS_CASH_balance.csv
 import numpy as np
 import pandas as pd
 
+from src.config import RECENCY_MONTHS
 from src.utils.helpers import one_hot_encoder, reduce_mem_usage
 
 def process_pos_cash(pos: pd.DataFrame) -> pd.DataFrame:
@@ -39,7 +40,7 @@ def process_pos_cash(pos: pd.DataFrame) -> pd.DataFrame:
         pos_agg = pd.concat([pos_agg, pd.DataFrame(cat_parts)], axis=1)
 
     # ── Recent 3-month aggregations ───────────────────────────────────────────
-    recent = pos[pos["MONTHS_BALANCE"] >= -3]
+    recent = pos[pos["MONTHS_BALANCE"] >= RECENCY_MONTHS]
     if not recent.empty:
         rec_agg = recent.groupby("SK_ID_CURR").agg({
             "SK_DPD":     ["max", "mean"],

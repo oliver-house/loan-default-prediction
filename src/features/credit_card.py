@@ -5,6 +5,7 @@ Feature engineering for credit_card_balance.csv.
 import numpy as np
 import pandas as pd
 
+from src.config import RECENCY_MONTHS
 from src.utils.helpers import one_hot_encoder, reduce_mem_usage
 
 def process_credit_card(cc: pd.DataFrame) -> pd.DataFrame:
@@ -61,7 +62,7 @@ def process_credit_card(cc: pd.DataFrame) -> pd.DataFrame:
         cc_agg = pd.concat([cc_agg, pd.DataFrame(cat_parts)], axis=1)
 
     # ── Recent 3-month aggregations ───────────────────────────────────────────
-    recent = cc[cc["MONTHS_BALANCE"] >= -3]
+    recent = cc[cc["MONTHS_BALANCE"] >= RECENCY_MONTHS]
     if not recent.empty:
         rec_cols = {c: ["max", "mean"] for c in
                     ["SK_DPD", "BALANCE_LIMIT_RATIO", "AMT_BALANCE",

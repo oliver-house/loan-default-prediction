@@ -5,6 +5,7 @@ Feature engineering for previous_application.csv
 import numpy as np
 import pandas as pd
 
+from src.config import SENTINEL_DAYS
 from src.utils.helpers import one_hot_encoder, reduce_mem_usage
 
 def process_previous_application(prev: pd.DataFrame) -> pd.DataFrame:
@@ -18,7 +19,7 @@ def process_previous_application(prev: pd.DataFrame) -> pd.DataFrame:
     ]
     for col in sentinel_cols:
         if col in prev.columns:
-            prev[col] = prev[col].replace(365243, np.nan)
+            prev[col] = prev[col].replace(SENTINEL_DAYS, np.nan)
 
     # ── Derived columns ───────────────────────────────────────────────────────
     prev["APP_CREDIT_RATIO"]    = prev["AMT_APPLICATION"] / (prev["AMT_CREDIT"] + 1)

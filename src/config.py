@@ -20,6 +20,12 @@ DATA_FILES = {
     "installments": DATA_DIR / "installments_payments.csv",
 }
 
+# ── Feature engineering constants ────────────────────────────────────────────
+SENTINEL_DAYS   = 365243   # "not applicable" sentinel in days columns
+DAYS_PER_YEAR   = 365      
+RECENCY_MONTHS  = -3
+RECENCY_DAYS    = -365
+
 # ── Cross-validation ─────────────────────────────────────────────────────────
 N_FOLDS = 3
 RANDOM_STATE = 42

@@ -5,6 +5,7 @@ Feature engineering for application_train.csv / application_test.csv
 import numpy as np
 import pandas as pd
 
+from src.config import SENTINEL_DAYS, DAYS_PER_YEAR
 from src.utils.helpers import one_hot_encoder
 
 def process_application(df: pd.DataFrame) -> pd.DataFrame:
@@ -15,14 +16,14 @@ def process_application(df: pd.DataFrame) -> pd.DataFrame:
     df = df.copy()
 
     # ── Anomaly flag: DAYS_EMPLOYED = 365243 means unemployed ────────────────
-    df["DAYS_EMPLOYED_ANOMALY"] = (df["DAYS_EMPLOYED"] == 365243).astype(np.int8)
-    df["DAYS_EMPLOYED"] = df["DAYS_EMPLOYED"].replace(365243, np.nan)
+    df["DAYS_EMPLOYED_ANOMALY"] = (df["DAYS_EMPLOYED"] == SENTINEL_DAYS).astype(np.int8)
+    df["DAYS_EMPLOYED"] = df["DAYS_EMPLOYED"].replace(SENTINEL_DAYS, np.nan)
 
     # ── Age / tenure in years ─────────────────────────────────────────────────
-    df["YEARS_BIRTH"] = df["DAYS_BIRTH"] / -365
-    df["YEARS_EMPLOYED"] = df["DAYS_EMPLOYED"] / -365
-    df["YEARS_REGISTRATION"] = df["DAYS_REGISTRATION"] / -365
-    df["YEARS_ID_PUBLISH"] = df["DAYS_ID_PUBLISH"] / -365
+    df["YEARS_BIRTH"] = df["DAYS_BIRTH"] / -DAYS_PER_YEAR
+    df["YEARS_EMPLOYED"] = df["DAYS_EMPLOYED"] / -DAYS_PER_YEAR
+    df["YEARS_REGISTRATION"] = df["DAYS_REGISTRATION"] / -DAYS_PER_YEAR
+    df["YEARS_ID_PUBLISH"] = df["DAYS_ID_PUBLISH"] / -DAYS_PER_YEAR
 
     # ── Core financial ratios ─────────────────────────────────────────────────
     df["CREDIT_INCOME_RATIO"] = df["AMT_CREDIT"] / (df["AMT_INCOME_TOTAL"] + 1)
@@ -52,8 +53,8 @@ def process_application(df: pd.DataFrame) -> pd.DataFrame:
 
     # ── Credit-to-external-score ratios ───────────────────────────────────────
     for src in ext_cols:
-        df[f"CREDIT_{src}_RATIO"] = df["AMT_CREDIT"] / (df[src] + 1e-5)
-        df[f"ANNUITY_{src}_RATIO"] = df["AMT_ANNUITY"] / (df[src] + 1e-5)
+        df[f"CREDIT_{src}_RATIO"] = df["AMT_CREDIT"] / (df[src] + 1)
+        df[f"ANNUITY_{src}_RATIO"] = df["AMT_ANNUITY"] / (df[src] + 1)
 
     # ── Document flags ────────────────────────────────────────────────────────
     doc_cols = [c for c in df.columns if c.startswith("FLAG_DOCUMENT_")]

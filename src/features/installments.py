@@ -5,6 +5,7 @@ Feature engineering for installments_payments.csv
 import numpy as np
 import pandas as pd
 
+from src.config import RECENCY_DAYS
 from src.utils.helpers import reduce_mem_usage
 
 
@@ -47,7 +48,7 @@ def process_installments(ins: pd.DataFrame) -> pd.DataFrame:
     )
 
     # ── Recent 12-month aggregations ─────────────────────────────────────────
-    recent = ins[ins["DAYS_INSTALMENT"] >= -365]
+    recent = ins[ins["DAYS_INSTALMENT"] >= RECENCY_DAYS]
     if not recent.empty:
         rec_agg = recent.groupby("SK_ID_CURR").agg({
             "DPD":           ["max", "mean"],

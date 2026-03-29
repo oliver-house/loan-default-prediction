@@ -16,8 +16,8 @@ A blended ensemble (LightGBM + XGBoost + CatBoost) trained on ~950 features extr
 ## Repository Structure
 
 ```
-train.py                    # Entry point: feature engineering, training, predictions
-tune_weights.py             # Grid search over ensemble weights; saves optimised predictions
+train.py                    # Entry point: feature engineering, training, weight tuning, predictions
+tune.py                     # LightGBM hyperparameter tuning with Optuna
 src/
   config.py                 # Paths, constants, model parameters
   features/
@@ -32,7 +32,6 @@ src/
     lgbm_model.py           # LightGBM training
     xgb_model.py            # XGBoost training
     catboost_model.py       # CatBoost training
-    ensemble.py             # Weighted blend
   utils/
     helpers.py              # Logging, memory reduction, timing
 ```
@@ -70,3 +69,11 @@ pip install -r requirements.txt
 ```powershell
 python train.py
 ```
+
+Optionally tune LightGBM hyperparameters before training:
+
+```powershell
+python tune.py --trials 50 --folds 3
+```
+
+Best params are saved to `predictions/lgbm_best_params.json` for reference.

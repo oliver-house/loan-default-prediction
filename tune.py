@@ -29,7 +29,7 @@ def objective(
         "verbosity":        -1,
         "boosting_type":    "gbdt",
         "n_jobs":           -1,
-        "learning_rate":    trial.suggest_float("learning_rate",   1e-3, 0.1,  log=True),
+        "learning_rate":    trial.suggest_float("learning_rate",   0.01, 0.1,  log=True),
         "num_leaves":       trial.suggest_int(  "num_leaves",      20,   300),
         "max_depth":        trial.suggest_int(  "max_depth",       3,    10),
         "min_child_samples":trial.suggest_int(  "min_child_samples", 10, 200),
@@ -57,13 +57,16 @@ def objective(
             num_boost_round=200,
             valid_sets=[val_data],
             callbacks=[
-                lgb.early_stopping(stopping_rounds=50, verbose=False),
+                lgb.early_stopping(stopping_rounds=30, verbose=False),
                 lgb.log_evaluation(period=-1),
             ],
         )
 
         preds = model.predict(X_val, num_iteration=model.best_iteration)
-        aucs.append(roc_auc_score(y_val, preds))
+        fold_auc = roc_auc_score(y_val, preds)
+        aucs.append(fold_auc)
+        logger.info(f"  Trial {trial.number} fold {len(aucs)}/{n_folds} AUC: {fold_auc:.5f} "
+                    f"(best iter: {model.best_iteration})")
 
     return float(np.mean(aucs))
 

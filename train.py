@@ -19,7 +19,7 @@ import numpy as np
 import pandas as pd
 from sklearn.metrics import roc_auc_score, roc_curve
 
-from src.config import ID_COL, TARGET_COL, PREDICTIONS_DIR
+from src.config import ID_COL, TARGET_COL, PREDICTIONS_DIR, PARAMS_DIR
 from src.features.pipeline import build_features
 from src.models.lgbm_model import train_lgbm
 from src.models.xgb_model import train_xgb
@@ -145,7 +145,7 @@ def main() -> None:
     features = [c for c in train.columns if c not in [TARGET_COL, ID_COL]]
 
     # ── Load pre-selected features if available ───────────────────────────────
-    selected_path = PREDICTIONS_DIR / "selected_features.json"
+    selected_path = PARAMS_DIR / "selected_features.json"
     if selected_path.exists():
         with open(selected_path) as f:
             selected = json.load(f)

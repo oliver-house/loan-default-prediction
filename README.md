@@ -2,7 +2,7 @@
 
 Predicts loan default risk using loan applications together with alternative financial data.
 
-A blended ensemble (LightGBM + XGBoost + CatBoost) trained on ~950 features extracted from 8 relational tables, with feature engineering and 5-fold stratified cross-validation.
+A blended ensemble (LightGBM + XGBoost + CatBoost) trained on ~950 features extracted from 8 relational tables, with feature engineering and 3-fold stratified cross-validation.
 
 ## Results
 

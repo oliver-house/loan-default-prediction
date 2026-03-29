@@ -3,7 +3,7 @@ End-to-end training pipeline.
 
 Builds features, trains all three models,
 tunes ensemble weights via grid search,
-and saves OOF + test predictions to disk.
+and saves OOF + test predictions, feature importances, and diagnostic plots to disk.
 
 Usage
 -----
@@ -91,6 +91,33 @@ def _plot_roc_curve(y: np.ndarray, oof_blend: np.ndarray, auc: float) -> None:
     logger.info(f"ROC curve saved to {out_path}")
 
 
+def _norm(arr: np.ndarray) -> np.ndarray:
+    """Normalise an array to sum to 1."""
+    s = arr.sum()
+    if s == 0:
+        raise ValueError("All feature importances are zero — something has gone wrong.")
+    return arr / s
+
+
+def _plot_feature_importances(df: pd.DataFrame, top_n: int = 30) -> None:
+    """Horizontal bar charts of top N features for each model and the ensemble."""
+    top = df.head(top_n)
+    fig, axes = plt.subplots(1, 4, figsize=(24, 10))
+    for ax, col, title in zip(
+        axes,
+        ["lgbm", "xgb", "catboost", "ensemble"],
+        ["LightGBM", "XGBoost", "CatBoost", "Ensemble"],
+    ):
+        ax.barh(top["feature"][::-1], top[col][::-1])
+        ax.set_title(f"{title} — top {top_n}")
+        ax.set_xlabel("Normalised importance")
+    out_path = PREDICTIONS_DIR / "feature_importances.png"
+    plt.tight_layout()
+    plt.savefig(out_path, dpi=150)
+    plt.close()
+    logger.info(f"Feature importance plot saved to {out_path}")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--smoke", action="store_true",
@@ -113,13 +140,13 @@ def main() -> None:
     fold_kwargs = {} if n_folds is None else {"n_folds": n_folds}
 
     with timer("LightGBM", logger):
-        lgbm_oof, lgbm_test, _ = train_lgbm(train, test, features, **fold_kwargs)
+        lgbm_oof, lgbm_test, lgbm_imp = train_lgbm(train, test, features, **fold_kwargs)
 
     with timer("XGBoost", logger):
-        xgb_oof, xgb_test, _ = train_xgb(train, test, features, **fold_kwargs)
+        xgb_oof, xgb_test, xgb_imp = train_xgb(train, test, features, **fold_kwargs)
 
     with timer("CatBoost", logger):
-        cb_oof, cb_test, _ = train_catboost(train, test, features, **fold_kwargs)
+        cb_oof, cb_test, cb_imp = train_catboost(train, test, features, **fold_kwargs)
 
     # ── Weight tuning ─────────────────────────────────────────────────────────
     with timer("Weight tuning", logger):
@@ -156,6 +183,26 @@ def main() -> None:
     pred_path = PREDICTIONS_DIR / "test_predictions.csv"
     pd.DataFrame({ID_COL: test_ids, "TARGET": test_blend}).to_csv(pred_path, index=False)
     logger.info(f"Test predictions saved to {pred_path}")
+
+    # ── Feature importances ───────────────────────────────────────────────────
+    lgbm_imp_n = _norm(lgbm_imp)
+    xgb_imp_n  = _norm(xgb_imp)
+    cb_imp_n   = _norm(cb_imp)
+    ens_imp    = (best_weights["lgbm"] * lgbm_imp_n + best_weights["xgb"] * xgb_imp_n
+                  + best_weights["catboost"] * cb_imp_n)
+
+    imp_df = pd.DataFrame({
+        "feature":   features,
+        "lgbm":      lgbm_imp_n,
+        "xgb":       xgb_imp_n,
+        "catboost":  cb_imp_n,
+        "ensemble":  ens_imp,
+    }).sort_values("ensemble", ascending=False).reset_index(drop=True)
+
+    imp_path = PREDICTIONS_DIR / "feature_importances.csv"
+    imp_df.to_csv(imp_path, index=False)
+    logger.info(f"Feature importances saved to {imp_path}")
+    _plot_feature_importances(imp_df)
 
     # ── Save results summary ──────────────────────────────────────────────────
     results = {

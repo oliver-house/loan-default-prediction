@@ -20,18 +20,19 @@ def train_xgb(
     test: pd.DataFrame,
     features: list[str],
     n_folds: int = N_FOLDS,
-) -> tuple[np.ndarray, np.ndarray, list[float]]:
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     Train XGBoost with stratified K-Fold CV.
-    Returns out-of-fold predictions, test predictions, and per-fold AUC scores.
+    Returns out-of-fold predictions, test predictions, and feature importances.
     """
     X      = train[features].values
     y      = train[TARGET_COL].values
     X_test = test[features].values
 
-    oof_preds  = np.zeros(len(train))
-    test_preds = np.zeros(len(test))
-    fold_aucs  = []
+    oof_preds        = np.zeros(len(train))
+    test_preds       = np.zeros(len(test))
+    fold_aucs        = []
+    fold_importances = np.zeros(len(features))
 
     skf = StratifiedKFold(n_splits=n_folds, shuffle=True, random_state=RANDOM_STATE)
 
@@ -50,6 +51,7 @@ def train_xgb(
             **params,
             n_estimators=n_estimators,
             early_stopping_rounds=100,
+            importance_type="gain",
         )
         model.fit(
             X_trn, y_trn,
@@ -63,6 +65,7 @@ def train_xgb(
         auc = roc_auc_score(y_val, oof_preds[val_idx])
         fold_aucs.append(auc)
         logger.info(f"  Fold {fold} AUC: {auc:.5f}")
+        fold_importances += model.feature_importances_
 
         del model, X_trn, y_trn, X_val, y_val
         gc.collect()
@@ -71,4 +74,4 @@ def train_xgb(
     logger.info(f"XGBoost OOF AUC: {overall_auc:.5f} | "
                 f"Mean fold AUC: {np.mean(fold_aucs):.5f} ± {np.std(fold_aucs):.5f}")
 
-    return oof_preds, test_preds, fold_aucs
+    return oof_preds, test_preds, fold_importances / n_folds

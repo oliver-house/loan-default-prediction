@@ -8,10 +8,10 @@ A blended ensemble (LightGBM + XGBoost + CatBoost) trained on ~950 features extr
 
 | Model | OOF AUC | Held-out Test AUC | Weight |
 |-------|---------|-------------------|--------|
-| LightGBM | 0.7894 | — | 0.12 |
-| XGBoost | 0.7926 | — | 0.46 |
-| CatBoost | 0.7921 | — | 0.42 |
-| **Ensemble** | **0.7947** | **0.7885** | — |
+| LightGBM | 0.78791 | — | 0.14 |
+| XGBoost | 0.79102 | — | 0.42 |
+| CatBoost | 0.79087 | — | 0.44 |
+| **Ensemble** | **0.79348** | **0.78745** | — |
 
 ## Repository Structure
 
